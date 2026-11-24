@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#400000" />
+    <title>Live build — Mukesh M</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Geist:wght@300..600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #400000;
+        --bg-alt: #4B0000;
+        --surface: #650002;
+        --line: #8D0004;
+        --red: #A80001;
+        --cream: #FFDBAF;
+        --muted: rgba(255, 219, 175, 0.6);
+        --faint: rgba(255, 219, 175, 0.38);
+        --sans: 'Geist', Helvetica, Arial, sans-serif;
+        --display: 'Archivo', Helvetica, Arial, sans-serif;
+        --serif: 'Instrument Serif', Georgia, serif;
+        --mono: 'JetBrains Mono', monospace;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html { background: var(--bg); color-scheme: dark; }
+      body {
+        background: var(--bg); color: var(--cream); font-family: var(--sans);
+        -webkit-font-smoothing: antialiased; min-height: 100svh;
+      }
+      a { color: inherit; text-decoration: none; }
+      .edge { padding-inline: clamp(20px, 4vw, 56px); max-width: 1440px; margin: 0 auto; }
+      header { border-bottom: 1px solid var(--line); }
+      .bar {
+        display: flex; align-items: center; justify-content: space-between; gap: 20px;
+        height: 70px; font-family: var(--mono); font-size: 9px; letter-spacing: .13em; text-transform: uppercase;
+      }
+      .brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 600; letter-spacing: .02em; }
+      .brand em { font-family: var(--serif); font-size: 27px; line-height: .7; font-style: italic; }
+      .back { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); transition: color .25s; }
+      .back:hover { color: var(--cream); }
+      .hero { padding: clamp(48px, 7vw, 96px) 0 0; }
+      .eyebrow { font-family: var(--mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); display: flex; gap: 12px; align-items: center; }
+      .eyebrow b { color: var(--red); font-weight: 400; }
+      h1 {
+        margin-top: 20px; font-family: var(--display); font-stretch: 116%; font-weight: 600;
+        font-size: clamp(64px, 13vw, 190px); line-height: .8; letter-spacing: -.065em;
+      }
+      .tagline { margin-top: 18px; font-family: var(--serif); font-style: italic; font-size: clamp(22px, 3.2vw, 42px); line-height: 1.1; color: var(--cream); }
+      .meta { display: flex; flex-wrap: wrap; gap: 26px; margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+      .meta span + span { position: relative; }
+      .screen { margin-top: clamp(36px, 5vw, 64px); border: 1px solid var(--line); background: var(--bg-alt); }
+      .screen-bar { display: flex; align-items: center; gap: 6px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+      .screen-bar i { width: 6px; height: 6px; border: 1px solid var(--line); border-radius: 50%; }
+      .screen-bar span { margin-left: 10px; font-family: var(--mono); font-size: 8px; letter-spacing: .1em; color: var(--faint); }
+      .screen-bar b { margin-left: auto; font-family: var(--mono); font-size: 7.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--red); font-weight: 400; }
+      .viewport { min-height: clamp(390px, 55vw, 620px); padding: clamp(20px, 4vw, 48px); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+      .grid-lines { position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(rgba(255,219,175,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,219,175,.045) 1px, transparent 1px); background-size: 52px 52px; }
+      .panel { position: relative; z-index: 2; }
+      .metrics { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-top: 0; background: var(--bg-alt); }
+      .metrics div { padding: 22px clamp(16px, 2.4vw, 30px); border-right: 1px solid var(--line); }
+      .metrics div:last-child { border-right: 0; }
+      .metrics strong { display: block; font-family: var(--display); font-stretch: 110%; font-weight: 500; font-size: clamp(28px, 3.8vw, 48px); line-height: 1; letter-spacing: -.04em; }
+      .metrics span { display: block; margin-top: 6px; font-family: var(--mono); font-size: 7.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+      .notes { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(20px, 4vw, 56px); padding: clamp(40px, 6vw, 80px) 0; border-top: 1px solid var(--line); margin-top: clamp(40px, 6vw, 80px); }
+      .notes h2 { font-family: var(--mono); font-size: 9px; font-weight: 400; letter-spacing: .12em; text-transform: uppercase; color: var(--red); margin-bottom: 12px; }
+      .notes p { font-size: 13px; line-height: 1.6; color: var(--muted); max-width: 36ch; }
+      footer { border-top: 1px solid var(--line); }
+      .foot { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 24px 0; font-family: var(--mono); font-size: 8px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+      .foot a:hover { color: var(--cream); }
+      .next { display: inline-flex; align-items: center; gap: 8px; color: var(--cream); }
+      .serif { font-family: var(--serif); font-style: italic; }
+
+      /* Sundial */
+      .sundial { width: min(840px, 100%); display: grid; grid-template-columns: 1.2fr .8fr; gap: 14px; }
+      .sun-card { background: var(--cream); color: var(--bg); padding: clamp(18px, 3vw, 30px); }
+      .sun-top { display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: rgba(64,0,0,.6); }
+      .sun-avatar { width: 25px; height: 25px; border: 1px solid rgba(64,0,0,.3); border-radius: 50%; display: grid; place-items: center; font-size: 8px; }
+      .sun-balance { margin-top: 26px; }
+      .sun-balance span { display: block; font-family: var(--mono); font-size: 7.5px; letter-spacing: .1em; text-transform: uppercase; color: rgba(64,0,0,.55); }
+      .sun-balance strong { display: block; font-family: var(--display); font-stretch: 108%; font-size: clamp(34px, 6vw, 64px); line-height: 1; letter-spacing: -.045em; margin-top: 4px; }
+      .sun-balance em { font-family: var(--mono); font-style: normal; font-size: 8px; color: var(--red); }
+      .chart { display: flex; align-items: flex-end; gap: 6px; height: 74px; margin-top: 26px; border-bottom: 1px solid rgba(64,0,0,.2); padding-bottom: 4px; }
+      .chart span { flex: 1; background: rgba(64,0,0,.2); }
+      .chart span.hot { background: var(--red); }
+      .sun-side { border: 1px solid var(--line); padding: 20px; display: flex; flex-direction: column; gap: 16px; background: var(--surface); }
+      .sun-side h3 { font-family: var(--mono); font-size: 8px; font-weight: 400; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+      .goal { border-top: 1px solid var(--line); padding-top: 12px; }
+      .goal b { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 8px; font-weight: 400; color: var(--cream); }
+      .goal i { display: block; height: 2px; background: var(--line); margin-top: 7px; }
+      .goal i em { display: block; width: 68%; height: 100%; background: var(--red); }
+      .sun-actions { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+      .sun-actions span { border: 1px solid var(--line); padding: 10px 8px; text-align: center; font-family: var(--mono); font-size: 7px; letter-spacing: .06em; text-transform: uppercase; color: var(--cream); }
+      .sun-actions span:first-child { background: var(--red); border-color: var(--red); }
+
+      /* Kettle */
+      .kettle { width: min(900px, 100%); display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(20px, 5vw, 60px); align-items: center; }
+      .bag-wrap { display: flex; justify-content: center; position: relative; }
+      .bag-wrap::before { content: ''; position: absolute; width: 78%; aspect-ratio: 1; border: 1px solid var(--line); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+      .bag { position: relative; width: min(210px, 68%); aspect-ratio: .62; background: var(--cream); color: var(--bg); padding: 16px 14px 20px; transform: rotate(-4deg); display: flex; flex-direction: column; box-shadow: 20px 26px 50px rgba(64,0,0,.4); }
+      .bag-brand { font-family: var(--display); font-stretch: 122%; font-weight: 600; font-size: 19px; border-bottom: 1px solid rgba(64,0,0,.25); padding-bottom: 10px; }
+      .bag-label { margin-top: auto; }
+      .bag-label small { display: block; font-family: var(--mono); font-size: 6.5px; letter-spacing: .1em; text-transform: uppercase; color: rgba(64,0,0,.6); }
+      .bag-label strong { display: block; font-family: var(--serif); font-style: italic; font-size: clamp(40px, 5vw, 58px); font-weight: 400; line-height: .9; margin: 5px 0 8px; }
+      .bag-rip { margin-top: 12px; border-top: 1px dashed rgba(64,0,0,.35); border-bottom: 1px dashed rgba(64,0,0,.35); height: 9px; }
+      .kettle-copy h2 { font-family: var(--display); font-stretch: 112%; font-size: clamp(30px, 4.6vw, 56px); font-weight: 500; line-height: .98; letter-spacing: -.04em; }
+      .kettle-copy h2 em { font-family: var(--serif); font-style: italic; font-weight: 400; }
+      .kettle-copy p { margin-top: 16px; font-size: 13px; line-height: 1.6; color: var(--muted); max-width: 38ch; }
+      .brew { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 24px; border-top: 1px solid var(--line); padding-top: 14px; }
+      .brew span { font-family: var(--mono); font-size: 7.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+      .brew b { display: block; margin-top: 3px; font-family: var(--display); font-size: 14px; font-weight: 500; color: var(--cream); }
+      .kettle-cta { display: inline-flex; margin-top: 24px; padding: 13px 20px; border-radius: 999px; background: var(--cream); color: var(--bg); font-size: 11px; font-weight: 500; }
+
+      /* Northline */
+      .north { width: 100%; max-width: 920px; display: grid; grid-template-columns: 1.05fr .95fr; gap: 14px; }
+      .map { border: 1px solid var(--line); background: var(--surface); position: relative; min-height: 300px; }
+      .map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .map path { fill: none; stroke: rgba(255,219,175,.45); stroke-width: 1; stroke-dasharray: 3 4; }
+      .map path.dim { stroke: rgba(255,219,175,.15); }
+      .map circle { fill: var(--red); stroke: var(--cream); stroke-width: 1; }
+      .map-tag { position: absolute; padding: 4px 7px; border: 1px solid var(--line); background: var(--surface); font-family: var(--mono); font-size: 7px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+      .map-tag.a { left: 26%; top: 30%; }
+      .map-tag.b { right: 14%; top: 16%; }
+      .manifest { border: 1px solid var(--line); background: var(--bg-alt); padding: 16px; }
+      .manifest h3 { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 7.5px; font-weight: 400; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); padding-bottom: 11px; border-bottom: 1px solid var(--line); }
+      .manifest h3 b { font-family: var(--display); font-size: 20px; letter-spacing: -.03em; color: var(--cream); font-weight: 500; }
+      .mrow { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; padding: 10px 0; border-bottom: 1px solid rgba(141,0,4,.35); font-family: var(--mono); font-size: 7.5px; color: var(--muted); }
+      .mrow b { font-weight: 400; color: var(--cream); }
+      .mrow b.warn { color: var(--red); }
+      .manifest p { margin-top: 18px; font-family: var(--serif); font-style: italic; font-size: 18px; line-height: 1.2; color: var(--cream); }
+
+      /* Folio */
+      .folio { width: 100%; max-width: 900px; display: grid; grid-template-columns: .8fr 1.2fr; gap: clamp(20px, 4vw, 50px); align-items: center; }
+      .books { display: flex; align-items: flex-end; justify-content: center; gap: 6px; }
+      .book { width: 72px; height: 150px; background: var(--cream); color: var(--bg); padding: 9px 8px; display: flex; flex-direction: column; justify-content: space-between; transform: rotate(-6deg) translateY(8px); }
+      .book:nth-child(2) { height: 170px; background: var(--surface); color: var(--cream); transform: translateY(-8px); }
+      .book:nth-child(3) { background: var(--line); color: var(--cream); transform: rotate(5deg); }
+      .book:nth-child(4) { transform: rotate(9deg) translateY(12px); }
+      .book em { font-family: var(--serif); font-style: italic; font-size: 14px; line-height: .95; }
+      .book b { font-family: var(--mono); font-size: 5.5px; font-weight: 400; letter-spacing: .08em; }
+      .reader { background: var(--bg-alt); border: 1px solid var(--line); padding: clamp(20px, 3vw, 34px); }
+      .reader .micro { font-family: var(--mono); font-size: 7px; letter-spacing: .12em; text-transform: uppercase; color: var(--red); }
+      .reader h2 { margin-top: 10px; font-family: var(--serif); font-style: italic; font-weight: 400; font-size: clamp(28px, 4vw, 44px); line-height: 1; }
+      .reader p { margin-top: 14px; font-family: var(--serif); font-size: 15px; line-height: 1.55; color: var(--muted); }
+      .reader p:first-of-type::first-letter { float: left; font-size: 46px; line-height: .8; padding: 6px 7px 0 0; color: var(--cream); }
+      .reader .byline { margin-top: 20px; padding-top: 12px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 7px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); display: flex; justify-content: space-between; }
+      @media (max-width: 760px) {
+        .sundial, .kettle, .north, .folio { grid-template-columns: 1fr; }
+        .sun-side { display: none; }
+        .metrics { grid-template-columns: 1fr; }
+        .metrics div { border-right: 0; border-bottom: 1px solid var(--line); }
+        .metrics div:last-child { border-bottom: 0; }
+        .notes { grid-template-columns: 1fr; }
+        .foot { flex-direction: column; align-items: flex-start; }
+        .books { padding-block: 20px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="edge bar">
+        <a class="brand" href="../"><em>M.</em> MUKESH M</a>
+        <span id="build-label">Live build</span>
+        <a class="back" href="../">← Back to portfolio</a>
+      </div>
+    </header>
+
+    <main class="edge">
+      <section class="hero">
+        <p class="eyebrow"><b id="idx">01</b> <span id="discipline">Fintech · Product site</span> <span>·</span> <span>Live demo</span></p>
+        <h1 id="title">Sundial</h1>
+        <p class="tagline" id="tagline">Banking that respects your attention.</p>
+        <div class="meta">
+          <span id="role">Design engineering</span>
+          <span id="year">2026</span>
+          <span id="stack">Next.js · TypeScript · Framer Motion</span>
+          <span>Recreated for the web</span>
+        </div>
+      </section>
+
+      <section class="screen" aria-label="Project screen">
+        <div class="screen-bar">
+          <i></i><i></i><i></i>
+          <span id="url">sundial.money</span>
+          <b>Interactive mock</b>
+        </div>
+        <div class="viewport" id="viewport">
+          <div class="grid-lines"></div>
+          <div class="panel" id="panel"></div>
+        </div>
+      </section>
+
+      <section class="metrics" id="metrics"></section>
+
+      <section class="notes">
+        <div><h2>01 — Brief</h2><p id="note1"></p></div>
+        <div><h2>02 — Build</h2><p id="note2"></p></div>
+        <div><h2>03 — Result</h2><p id="note3"></p></div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="edge foot">
+        <span>© 2026 Mukesh M · Recreated demo, no live data.</span>
+        <a class="next" id="next" href="?p=kettle">Next build →</a>
+        <a href="../">mukesh.design</a>
+      </div>
+    </footer>
+
+    <script>
+      const projects = {
+        sundial: {
+          idx: '01', title: 'Sundial', tagline: 'Banking that respects your attention.',
+          discipline: 'Fintech · Product site and onboarding', role: 'Design engineering',
+          year: '2026', stack: 'Next.js · TypeScript · Stripe', url: 'sundial.money',
+          metrics: [['+38%', 'verified activation'], ['1.2s', 'largest paint'], ['99', 'Lighthouse, mobile']],
+          notes: [
+            'Cut an eleven-field application to four decisions and moved KYC behind the first useful screen. The site had to prove the product before sign-up.',
+            'A live balance preview renders before an account exists. Motion shows cause and effect only: a deposit lands, a goal fills, a number moves.',
+            'Activation rose 38% in the first quarter. The onboarding is now the product demo, and the site holds 99 on a mid-range Android phone.'
+          ],
+          panel: `
+            <div class="sundial">
+              <div class="sun-card">
+                <div class="sun-top"><span>Good evening, Asha</span><span class="sun-avatar">A</span></div>
+                <div class="sun-balance"><span>Total balance</span><strong>₹2,48,610</strong><em>+ ₹18,240 this month</em></div>
+                <div class="chart">${[42,58,36,72,54,88,64,96,78,60,84,48].map((h,i)=>`<span style="height:${h}%" class="${i===7?'hot':''}"></span>`).join('')}</div>
+              </div>
+              <div class="sun-side">
+                <h3>This month</h3>
+                <div class="goal"><b><span>Goa, December</span><span>68%</span></b><i><em></em></i></div>
+                <div class="goal"><b><span>Rent buffer</span><span>92%</span></b><i><em style="width:92%"></em></i></div>
+                <div class="goal"><b><span>Studio fund</span><span>41%</span></b><i><em style="width:41%"></em></i></div>
+                <div class="sun-actions"><span>Add money</span><span>Move</span></div>
+              </div>
+            </div>`
+        },
+        kettle: {
+          idx: '02', title: 'Kettle', tagline: 'A coffee shop that smells like the roast.',
+          discipline: 'Commerce · Headless storefront', role: 'Creative development',
+          year: '2025', stack: 'Hydrogen · Sanity · GSAP', url: 'kettle.coffee/guji',
+          metrics: [['+52%', 'mobile revenue'], ['2.4×', 'subscription starts'], ['0.6s', 'interaction latency']],
+          notes: [
+            'Every lot changes the story. The old theme treated a rare Guji like a commodity blend, so customers bought on price or left.',
+            'Each lot gets its own editorial page: farm, altitude, process and a brew recipe from the roaster. The bag is rendered in the browser so its colour changes with the lot.',
+            'Mobile revenue grew 52% without discounting. New lots now sell out in under a week, and subscription is one tap from any coffee page.'
+          ],
+          panel: `
+            <div class="kettle">
+              <div class="bag-wrap">
+                <div class="bag">
+                  <div class="bag-brand">KETTLE</div>
+                  <div class="bag-label"><small>Single origin</small><strong>Guji</strong><small>Ethiopia · 1,950 m</small><small>Washed · 250 g</small></div>
+                  <div class="bag-rip"></div>
+                </div>
+              </div>
+              <div class="kettle-copy">
+                <h2>Peach, jasmine,<br/><em>and a long finish.</em></h2>
+                <p>Lot 14 from the Guji highlands. Washed, slow-dried and roasted light enough to keep the florals intact.</p>
+                <div class="brew"><span>Roast<b>Light</b></span><span>Brew<b>V60</b></span><span>Ratio<b>1 : 16</b></span></div>
+                <span class="kettle-cta">Add 250 g — ₹1,180</span>
+              </div>
+            </div>`
+        },
+        northline: {
+          idx: '03', title: 'Northline', tagline: 'One screen instead of six.',
+          discipline: 'Logistics · Operations dashboard', role: 'Product design, front-end lead',
+          year: '2024', stack: 'React · D3 · WebSockets', url: 'ops.northline.co',
+          metrics: [['−41%', 'time to resolve'], ['14k', 'shipments a day'], ['6→1', 'tools replaced']],
+          notes: [
+            'Dispatchers copied tracking numbers between four tabs and a spreadsheet. A delayed container could sit unnoticed for ninety minutes.',
+            'We built around exceptions, not data volume. Map, manifest and thread share one selection, positions stream live, and every action is keyboard reachable.',
+            'Time to resolve fell 41%. Four internal tools and two spreadsheets were retired, and the dashboard carries peak season without a new hire.'
+          ],
+          panel: `
+            <div class="north">
+              <div class="map">
+                <svg viewBox="0 0 400 300" preserveAspectRatio="none">
+                  <path d="M16 240 C 90 190, 98 122, 168 112 S 262 164, 316 84 S 368 48, 392 30"/>
+                  <path class="dim" d="M18 60 C 82 82, 122 44, 178 68 S 274 114, 326 78 S 370 100, 394 132"/>
+                  <path class="dim" d="M44 282 C 100 246, 142 258, 186 224 S 268 226, 306 194 S 360 186, 394 200"/>
+                  <circle cx="168" cy="112" r="4.5"/><circle cx="316" cy="84" r="4.5"/>
+                </svg>
+                <span class="map-tag a">BLR / HUB</span>
+                <span class="map-tag b">MAA / 04:12</span>
+              </div>
+              <div class="manifest">
+                <h3><span>Live manifest</span><b>14,284</b></h3>
+                <div class="mrow"><span>NL-4821</span><span>In transit</span><b>On time</b></div>
+                <div class="mrow"><span>NL-4822</span><span>Customs</span><b class="warn">2h late</b></div>
+                <div class="mrow"><span>NL-4823</span><span>Delivered</span><b>On time</b></div>
+                <div class="mrow"><span>NL-4824</span><span>Loading</span><b>On time</b></div>
+                <div class="mrow"><span>NL-4825</span><span>Customs</span><b class="warn">45m late</b></div>
+                <p>“One selection. The yard, the manifest and the thread finally agree.”</p>
+              </div>
+            </div>`
+        },
+        folio: {
+          idx: '04', title: 'Folio', tagline: 'Reading, without the noise.',
+          discipline: 'Publishing · Reading platform', role: 'Design systems, front-end',
+          year: '2023', stack: 'Astro · MDX · Postgres', url: 'folio.press/long-afternoon',
+          metrics: [['0.4s', 'LCP on 4G'], ['+67%', 'return readers'], ['240', 'titles migrated']],
+          notes: [
+            'The catalogue shipped 3.1 MB of JavaScript to display a poem. Editors needed a system they could publish into without calling a developer.',
+            'A quiet Astro front end, one strict type scale, and a small set of MDX blocks. No client router, no recommendation carousel — just the next essay chosen by an editor.',
+            'LCP dropped to 0.4 seconds on 4G. Return readers rose 67%, and 90 new titles have shipped without a single layout bug.'
+          ],
+          panel: `
+            <div class="folio">
+              <div class="books">
+                <div class="book"><em>The Long<br/>Afternoon</em><b>FOLIO 018</b></div>
+                <div class="book"><em>Small<br/>Hours</em><b>FOLIO 041</b></div>
+                <div class="book"><em>Field<br/>Notes</em><b>FOLIO 062</b></div>
+                <div class="book"><em>Salt<br/>Water</em><b>FOLIO 089</b></div>
+              </div>
+              <article class="reader">
+                <span class="micro">Fiction · 12 min</span>
+                <h2>The Long Afternoon</h2>
+                <p>By four the light had moved off the veranda and into the room where the fan turned, slowly, as if it had all the time in the world.</p>
+                <p>She read the same page three times, not because it was difficult, but because the house was quiet enough to hear it.</p>
+                <div class="byline"><span>Meera Joshi</span><span>Saved · 64%</span></div>
+              </article>
+            </div>`
+        }
+      };
+      const keys = Object.keys(projects);
+      const param = new URLSearchParams(location.search).get('p');
+      const id = projects[param] ? param : 'sundial';
+      const p = projects[id];
+      document.title = p.title + ' — Live build — Mukesh M';
+      document.getElementById('idx').textContent = p.idx;
+      document.getElementById('title').textContent = p.title;
+      document.getElementById('tagline').textContent = p.tagline;
+      document.getElementById('discipline').textContent = p.discipline;
+      document.getElementById('role').textContent = p.role;
+      document.getElementById('year').textContent = p.year;
+      document.getElementById('stack').textContent = p.stack;
+      document.getElementById('url').textContent = p.url;
+      document.getElementById('panel').innerHTML = p.panel;
+      document.getElementById('metrics').innerHTML = p.metrics.map(([v,l]) => `<div><strong>${v}</strong><span>${l}</span></div>`).join('');
+      document.getElementById('note1').textContent = p.notes[0];
+      document.getElementById('note2').textContent = p.notes[1];
+      document.getElementById('note3').textContent = p.notes[2];
+      const next = keys[(keys.indexOf(id) + 1) % keys.length];
+      const nextEl = document.getElementById('next');
+      nextEl.textContent = 'Next build: ' + projects[next].title + ' →';
+      nextEl.href = '?p=' + next;
+    </script>
+  </body>
+</html>
