@@ -65,7 +65,7 @@ export default function Projects() {
                   </h3>
                   <a
                     className="project-live"
-                    href={`${import.meta.env.BASE_URL}work/?p=${project.id}`}
+                    href={`${import.meta.env.BASE_URL}work/index.html?p=${project.id}`}
                     target="_blank"
                     rel="noreferrer"
                   >

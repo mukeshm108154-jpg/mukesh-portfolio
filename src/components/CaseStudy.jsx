@@ -115,7 +115,7 @@ export default function CaseStudy({ project, next, onClose, onNext }) {
             </dl>
             <a
               className="btn btn--solid"
-              href={`${import.meta.env.BASE_URL}work/?p=${project.id}`}
+              href={`${import.meta.env.BASE_URL}work/index.html?p=${project.id}`}
               target="_blank"
               rel="noreferrer"
             >

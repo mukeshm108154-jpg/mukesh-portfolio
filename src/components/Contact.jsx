@@ -51,8 +51,8 @@ export default function Contact() {
     const nextErrors = validate(values)
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length) {
-      const first = document.querySelector('.field.has-error input, .field.has-error textarea, .field.has-error select')
-      first?.focus()
+      const first = ['name', 'email', 'type', 'message'].find((key) => nextErrors[key])
+      if (first) document.getElementById(first)?.focus()
       return
     }
 
