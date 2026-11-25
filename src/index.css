@@ -395,6 +395,15 @@
     transform: translate(2px, -2px);
   }
 
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .project-arrow:active,
+  .copy-btn:active {
+    transform: scale(0.97);
+  }
+
   .btn--solid {
     background: var(--cream);
     color: var(--bg);
@@ -435,8 +444,7 @@
     align-items: center;
     gap: 24px;
     border-bottom: 1px solid transparent;
-    transition: background-color 0.4s var(--ease), border-color 0.4s var(--ease),
-      backdrop-filter 0.4s var(--ease);
+    transition: background-color 0.4s var(--ease), border-color 0.4s var(--ease);
   }
 
   .nav.is-scrolled {
