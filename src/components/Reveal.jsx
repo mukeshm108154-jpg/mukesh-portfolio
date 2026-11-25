@@ -1,17 +1,17 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { useLayoutEffect, useRef } from 'react'
+import { prefersReducedMotion, revealFrom } from '../lib/reveals'
 
-export default function Reveal({ children, delay = 0, y = 26, className = '', once = true }) {
-  const reduce = useReducedMotion()
+export default function Reveal({ children, delay = 0, y = 26, className = '' }) {
+  const ref = useRef(null)
+
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return
+    revealFrom(ref.current, y)
+  }, [y])
 
   return (
-    <motion.div
-      className={className}
-      initial={reduce ? false : { opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once, margin: '-10% 0px -10% 0px' }}
-      transition={{ duration: 0.85, delay, ease: [0.22, 1, 0.36, 1] }}
-    >
+    <div ref={ref} className={className} data-reveal data-reveal-delay={delay}>
       {children}
-    </motion.div>
+    </div>
   )
 }

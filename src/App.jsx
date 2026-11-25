@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { motion, useScroll, useSpring, useReducedMotion } from 'framer-motion'
 import useLenis from './lib/useLenis'
+import { initReveals } from './lib/reveals'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import About from './components/About'
@@ -82,6 +83,9 @@ function Cursor() {
 
 export default function App() {
   useLenis()
+
+  // All Reveal wrappers share one batched scroll trigger.
+  useEffect(() => initReveals(), [])
 
   useEffect(() => {
     document.documentElement.classList.add('is-ready')
