@@ -280,7 +280,8 @@
     }
 
     .intro-copy {
-      padding: calc(var(--nav-h) + 40px) var(--gutter) 18px;
+      gap: 8px;
+      padding: calc(var(--nav-h) + 34px) var(--gutter) 0;
     }
 
     .intro.is-static .intro-film {
@@ -289,7 +290,8 @@
     }
 
     .hero-foot {
-      height: 34px;
+      height: 32px;
+      font-size: 7px;
     }
   }
 }
