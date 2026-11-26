@@ -1,87 +1,138 @@
-import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { sceneState } from '../three/scene-state'
 import { scrollToId } from '../lib/scroll'
 import Magnetic from './Magnetic'
 import { ArrowDown, ArrowUpRight, Download } from './Icons'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const Scene = lazy(() => import('../three/Scene'))
+const TOTAL_FRAMES = 100
 const resumeUrl = `${import.meta.env.BASE_URL}Mukesh-M-Resume.pdf`
+const frameUrl = (index) =>
+  `${import.meta.env.BASE_URL}frames/frame-${String(index).padStart(3, '0')}.jpg`
 
 export default function Hero() {
   const stage = useRef(null)
-  const pin = useRef(null)
-  const beat0 = useRef(null)
-  const beat1 = useRef(null)
-  const beat2 = useRef(null)
-  const progressFill = useRef(null)
+  const film = useRef(null)
+  const copy = useRef(null)
+  const canvas = useRef(null)
+  const fill = useRef(null)
   const counter = useRef(null)
-  const [showScene, setShowScene] = useState(false)
+  const frames = useRef([])
+  const target = useRef(0)
 
+  const [reduceMotion] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  )
+
+  // Fetch every frame up front; the sequence is drawn from memory as you scroll.
   useEffect(() => {
-    const query = window.matchMedia('(min-width: 900px) and (prefers-reduced-motion: no-preference)')
-    const update = () => setShowScene(query.matches)
-    update()
-    query.addEventListener('change', update)
-    return () => query.removeEventListener('change', update)
+    frames.current = Array.from({ length: TOTAL_FRAMES }, (_, i) => {
+      const img = new Image()
+      img.decoding = 'async'
+      img.src = frameUrl(i + 1)
+      return img
+    })
   }, [])
 
-  useLayoutEffect(() => {
+  // Canvas renderer: cover-fits the current frame and eases toward scroll progress.
+  useEffect(() => {
+    const el = canvas.current
+    if (!el) return
+    const ctx = el.getContext('2d')
+    if (!ctx) return
+
+    let raf = 0
+    let width = 0
+    let height = 0
+    let shown = -1
+    let smooth = 0
+
+    const resize = () => {
+      const rect = el.getBoundingClientRect()
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      width = Math.max(1, Math.round(rect.width * dpr))
+      height = Math.max(1, Math.round(rect.height * dpr))
+      el.width = width
+      el.height = height
+      shown = -1
+    }
+
+    const paint = (index) => {
+      const img = frames.current[index]
+      if (!img || !img.complete || !img.naturalWidth) return false
+      const scale = Math.max(width / img.naturalWidth, height / img.naturalHeight)
+      const w = img.naturalWidth * scale
+      const h = img.naturalHeight * scale
+      ctx.clearRect(0, 0, width, height)
+      ctx.drawImage(img, (width - w) / 2, (height - h) / 2, w, h)
+      return true
+    }
+
+    const loop = () => {
+      const goal = reduceMotion ? 1 : target.current
+      smooth += (goal - smooth) * 0.18
+      if (Math.abs(goal - smooth) < 0.0006) smooth = goal
+
+      const index = Math.round(smooth * (TOTAL_FRAMES - 1))
+      if (index !== shown && paint(index)) {
+        shown = index
+        if (counter.current) counter.current.textContent = String(index + 1).padStart(3, '0')
+        if (fill.current) fill.current.style.transform = `scaleY(${(index + 1) / TOTAL_FRAMES})`
+      }
+      raf = requestAnimationFrame(loop)
+    }
+
+    resize()
+    loop()
+    window.addEventListener('resize', resize)
+
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', resize)
+    }
+  }, [reduceMotion])
+
+  // Scroll drives the film; near the end it dissolves into the hero copy.
+  useEffect(() => {
+    if (reduceMotion) return
+
+    const trigger = ScrollTrigger.create({
+      trigger: stage.current,
+      start: 'top top',
+      end: 'bottom bottom',
+      onUpdate: (self) => {
+        target.current = self.progress
+      },
+    })
+
     const ctx = gsap.context(() => {
-      const mm = gsap.matchMedia()
+      gsap.set(copy.current, { autoAlpha: 0, y: 56 })
 
-      mm.add('(min-width: 901px) and (prefers-reduced-motion: no-preference)', () => {
-        gsap.set([beat1.current, beat2.current], { autoAlpha: 0, y: 50 })
-
-        const trigger = {
+      const tl = gsap.timeline({
+        scrollTrigger: {
           trigger: stage.current,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 0.9,
-          onUpdate: (self) => {
-            sceneState.progress = self.progress
-            if (counter.current) {
-              const step = self.progress < 0.3 ? '01' : self.progress < 0.66 ? '02' : '03'
-              if (counter.current.textContent !== step) counter.current.textContent = step
-            }
-          },
-        }
-
-        const tl = gsap.timeline({ scrollTrigger: trigger })
-        tl.to(beat0.current, { autoAlpha: 0, y: -60, duration: 0.2, ease: 'power2.inOut' }, 0.25)
-          .to(beat1.current, { autoAlpha: 1, y: 0, duration: 0.2, ease: 'power2.out' }, 0.34)
-          .to(beat1.current, { autoAlpha: 0, y: -60, duration: 0.2, ease: 'power2.inOut' }, 0.62)
-          .to(beat2.current, { autoAlpha: 1, y: 0, duration: 0.2, ease: 'power2.out' }, 0.71)
-          .to('.hero-canvas', { opacity: 0.5, duration: 0.28, ease: 'none' }, 0.24)
-          .to('.hero-canvas', { opacity: 0.3, duration: 0.24, ease: 'none' }, 0.52)
-          .to('.hero-canvas', { opacity: 0.42, duration: 0.2, ease: 'none' }, 0.76)
-
-        gsap.fromTo(progressFill.current, { scaleY: 0 }, {
-          scaleY: 1,
-          ease: 'none',
-          scrollTrigger: { trigger: stage.current, start: 'top top', end: 'bottom bottom', scrub: true },
-        })
-
-        gsap.to('.hero-word', {
-          yPercent: 12,
-          ease: 'none',
-          scrollTrigger: { trigger: stage.current, start: 'top top', end: 'bottom bottom', scrub: true },
-        })
+          scrub: 0.6,
+        },
       })
 
-      mm.add('(max-width: 900px), (prefers-reduced-motion: reduce)', () => {
-        sceneState.progress = 0
-        gsap.set(beat0.current, { autoAlpha: 1, y: 0 })
-      })
-    }, pin)
+      // Positions are in timeline seconds; the zero-duration tween at 1 pins the
+      // timeline length to 1 so each position equals scroll progress.
+      tl.to(film.current, { opacity: 0, scale: 1.06, ease: 'none', duration: 0.14 }, 0.6)
+        .to(copy.current, { autoAlpha: 1, y: 0, ease: 'power2.out', duration: 0.14 }, 0.68)
+        .set({}, {}, 1)
+    }, stage)
 
     document.fonts?.ready.then(() => ScrollTrigger.refresh())
 
-    return () => ctx.revert()
-  }, [])
+    return () => {
+      trigger.kill()
+      ctx.revert()
+    }
+  }, [reduceMotion])
 
   const goWork = (e) => {
     e.preventDefault()
@@ -89,159 +140,82 @@ export default function Hero() {
   }
 
   return (
-    <section id="home" className="hero-stage" ref={stage}>
-      <div className="hero-pin" ref={pin}>
-        <div className="hero-canvas" aria-hidden>
-          {showScene && (
-            <Suspense fallback={null}>
-              <Scene />
-            </Suspense>
-          )}
-        </div>
-
-        <div className={`hero-fallback${showScene ? ' is-hidden' : ''}`} aria-hidden>
-          <span className="hf-ring hf-ring--1" />
-          <span className="hf-ring hf-ring--2" />
-          <span className="hf-ring hf-ring--3" />
-          <span className="hf-core">M</span>
-          <span className="hf-cross hf-cross--x" />
-          <span className="hf-cross hf-cross--y" />
-        </div>
-
-        <div className="hero-meta" aria-hidden>
-          <span>Portfolio — MM/26</span>
-          <span>Front-end · Product · Motion</span>
-          <span>12.9716° N, 77.5946° E</span>
-        </div>
-
-        <div className="hero-rail" aria-hidden>
-          <span className="hero-rail-label">Scroll</span>
-          <span className="hero-rail-track">
-            <i ref={progressFill} />
-          </span>
-          <span className="hero-rail-count">
-            <b ref={counter}>01</b> / 03
-          </span>
-        </div>
-
-        <div className="hero-word" aria-hidden>
-          MUKESH
-        </div>
-
-        <div className="hero-beats">
-          <div className="beat beat-0" ref={beat0}>
-            <div className="beat-inner">
-              <p className="hero-kicker">
-                <span className="dot" />
-                Independent web developer — Bengaluru
-              </p>
-
-              <h1 className="hero-title">
-                <span className="hero-name">Mukesh</span>{' '}
-                <span className="hero-initial">M.</span>
-                <span className="hero-title-note">
-                  Independent
-                  <br />
-                  since 2018
-                  <br />
-                  <span>Bengaluru, IN</span>
-                </span>
-              </h1>
-
-              <div className="hero-lower">
-                <p className="hero-lede">
-                  I build product sites and design systems for teams that care how the details feel.
-                  Fast by default. Strange on purpose.
-                </p>
-                <div className="hero-actions">
-                  <Magnetic>
-                    <a className="btn btn--solid" href="#work" onClick={goWork}>
-                      See selected work
-                      <ArrowDown />
-                    </a>
-                  </Magnetic>
-                  <Magnetic>
-                    <a className="btn btn--ghost" href={resumeUrl} download="Mukesh-M-Resume.pdf">
-                      Download résumé
-                      <Download />
-                    </a>
-                  </Magnetic>
-                </div>
-              </div>
-            </div>
+    <section id="home" className={`intro${reduceMotion ? ' is-static' : ''}`} ref={stage}>
+      <div className="intro-pin">
+        <div className="intro-film" ref={film} aria-hidden>
+          <canvas className="intro-canvas" ref={canvas} />
+          <div className="intro-hud">
+            <span>Intro film — MM/26</span>
+            <span className="intro-hud-mid">Portfolio · Selected work 2018—2026</span>
+            <span>
+              Frame <b ref={counter}>001</b> / 100
+            </span>
           </div>
-
-          <div className="beat beat-1" ref={beat1}>
-            <div className="beat-inner">
-              <p className="eyebrow">
-                <span>02</span> The work, in one sentence
-              </p>
-              <h2 className="statement">
-                I don’t decorate pages.
-                <br />
-                I <em>engineer</em> them.
-              </h2>
-              <div className="hero-proof">
-                <div>
-                  <strong>08</strong>
-                  <span>years shipping for the web</span>
-                </div>
-                <div>
-                  <strong>42</strong>
-                  <span>launches, from seed to scale</span>
-                </div>
-                <div>
-                  <strong>98</strong>
-                  <span>median Lighthouse score</span>
-                </div>
-              </div>
-              <p className="beat-note">
-                Interfaces, systems and motion for product teams from Bengaluru to Berlin.
-                No template. No hand-off theatre.
-              </p>
-            </div>
+          <div className="intro-rail">
+            <span className="intro-rail-label">Scroll to play</span>
+            <span className="intro-rail-track">
+              <i ref={fill} />
+            </span>
           </div>
+        </div>
 
-          <div className="beat beat-2" ref={beat2}>
-            <div className="beat-inner">
-              <p className="eyebrow">
-                <span>03</span> Next available — Q1 2027
-              </p>
-              <h2 className="statement">
-                Two slots.
+        <div className="intro-copy" ref={copy}>
+          <p className="hero-kicker">
+            <span className="dot" />
+            Independent web developer — Bengaluru
+          </p>
+
+          <div className="intro-copy-main">
+            <h1 className="hero-title">
+              <span className="hero-name">Mukesh</span> <span className="hero-initial">M.</span>
+              <span className="hero-title-note">
+                Independent
                 <br />
-                One <em>good</em> problem.
-              </h2>
-              <p className="hero-lede hero-lede--wide">
-                I take on a small number of builds a year, usually as the senior front-end
-                partner inside an existing team. Bring the hard part.
+                since 2018
+                <br />
+                <span>Bengaluru, IN</span>
+              </span>
+            </h1>
+
+            <div className="hero-lower">
+              <p className="hero-lede">
+                I build product sites and design systems for teams that care how the details feel.
+                Fast by default. Strange on purpose.
               </p>
               <div className="hero-actions">
                 <Magnetic>
-                  <a className="btn btn--solid" href="mailto:hello@mukesh.design?subject=Project%20enquiry">
-                    Start a conversation
-                    <ArrowUpRight />
+                  <a className="btn btn--solid" href="#work" onClick={goWork}>
+                    See selected work
+                    <ArrowDown />
                   </a>
                 </Magnetic>
-                <a className="link-line" href="#contact" onClick={(e) => { e.preventDefault(); scrollToId('contact') }}>
-                  Or read the brief guide
-                  <ArrowUpRight />
-                </a>
+                <Magnetic>
+                  <a className="btn btn--ghost" href={resumeUrl} download="Mukesh-M-Resume.pdf">
+                    Download résumé
+                    <Download />
+                  </a>
+                </Magnetic>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="hero-foot">
-          <span>Independent since 2018 · Previously Arcline, Paperplane</span>
-          <span className="hero-foot-mid">
-            <i />
-            Currently building Sundial v2
-          </span>
-          <span className="hero-foot-end">
-            Scroll to enter
-            <ArrowDown />
-          </span>
+          <div className="hero-foot">
+            <span>Independent since 2018 · Previously Arcline, Paperplane</span>
+            <span className="hero-foot-mid">
+              <i />
+              Currently building Sundial v2
+            </span>
+            <span className="hero-foot-end">
+              <a
+                className="link-line"
+                href="#work"
+                onClick={goWork}
+              >
+                Skip to the work
+              </a>
+              <ArrowUpRight />
+            </span>
+          </div>
         </div>
       </div>
     </section>
