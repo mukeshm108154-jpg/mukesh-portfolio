@@ -1,19 +1,21 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { projects } from '../data/content'
-import ProjectArt from './ProjectArt'
+import { skills } from '../data/content'
 import { prefersReducedMotion } from '../lib/reveals'
 
 gsap.registerPlugin(ScrollTrigger)
 
+const plates = skills
+const STEP = 360 / plates.length
+
 /**
- * 3D work ribbon — MotionSites' "Vante / Video Ribbon" scroll concept, rebuilt in
- * CSS 3D instead of WebGL so the site keeps its single-bundle weight.
+ * Craft ribbon — MotionSites' "Vante / Video Ribbon" depth concept, rebuilt in CSS 3D.
  *
- * Four project plates sit on a ring (rotateY(i × 90deg) translateZ(radius)). The
- * section pins, scroll progress turns the ring through all four builds, and the
- * counter tracks which plate is facing the viewer. Reduced motion gets a flat grid.
+ * Five discipline plates sit on a ring. The section pins and the scroll timeline
+ * holds each plate face-on for most of its step, turning only in the last 45% —
+ * so plates settle square to the viewer instead of resting mid-rotation.
+ * Reduced motion gets a flat grid with no pin and no rotation.
  */
 export default function WorkRibbon() {
   const root = useRef(null)
@@ -26,61 +28,64 @@ export default function WorkRibbon() {
     if (reduced) return
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        ring.current,
-        { rotateY: 0 },
-        {
-          rotateY: -270,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: root.current,
-            start: 'top top',
-            end: '+=180%',
-            pin: stage.current,
-            scrub: 0.6,
-            invalidateOnRefresh: true,
-            onUpdate: (self) => {
-              if (!count.current) return
-              const step = Math.round(self.progress * (projects.length - 1)) + 1
-              count.current.textContent = String(Math.min(step, projects.length)).padStart(2, '0')
-            },
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: root.current,
+          start: 'top top',
+          end: '+=200%',
+          pin: stage.current,
+          scrub: 0.5,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            if (!count.current) return
+            const step = Math.round(self.progress * (plates.length - 1)) + 1
+            count.current.textContent = String(Math.min(step, plates.length)).padStart(2, '0')
           },
         },
-      )
+      })
+
+      // One unit per plate: 55% held face-on, 45% turning to the next plate.
+      for (let i = 0; i < plates.length - 1; i += 1) {
+        tl.to(
+          ring.current,
+          { rotateY: -(i + 1) * STEP, duration: 0.45, ease: 'power2.inOut' },
+          i + 0.55,
+        )
+      }
     }, root)
 
     return () => ctx.revert()
   }, [reduced])
 
   return (
-    <section className="ribbon" ref={root} aria-label="Selected work in depth">
+    <section className="ribbon" ref={root} aria-label="Craft in depth">
       <div className="ribbon-stage" ref={stage}>
         <div className="ribbon-head">
-          <span className="kicker">03B — Work in depth</span>
+          <span className="kicker">03B — Craft in depth</span>
           <span className="ribbon-count">
             <span ref={count}>01</span>
             <i>/</i>
-            {String(projects.length).padStart(2, '0')}
+            {String(plates.length).padStart(2, '0')}
           </span>
         </div>
 
         <div className="ribbon-viewport">
           <div className={`ribbon-ring${reduced ? ' is-flat' : ''}`} ref={ring}>
-            {projects.map((project, i) => (
-              <article
-                className="ribbon-card"
-                key={project.id}
-                style={{ '--i': i }}
-                aria-hidden={!reduced}
-              >
-                <div className="ribbon-art">
-                  <ProjectArt id={project.id} />
+            {plates.map((plate, i) => (
+              <article className="ribbon-card" key={plate.id} style={{ '--i': i }}>
+                <div className="ribbon-card-inner">
+                  <span className="ribbon-card-index">{plate.index}</span>
+                  <h3>{plate.title}</h3>
+                  <p className="ribbon-card-lead">{plate.lead}</p>
+                  <ul className="tag-list">
+                    {plate.tags.slice(0, 4).map((tag) => (
+                      <li key={tag}>{tag}</li>
+                    ))}
+                  </ul>
                 </div>
                 <div className="ribbon-meta">
-                  <span>
-                    {project.index} — {project.title}
-                  </span>
-                  <span>{project.year}</span>
+                  <span>{plate.title}</span>
+                  <span>{plate.index}</span>
                 </div>
               </article>
             ))}
@@ -89,7 +94,7 @@ export default function WorkRibbon() {
 
         <p className="ribbon-note">
           <span className="status-dot" />
-          Scroll to turn the ribbon · four builds, three disciplines
+          Scroll to turn the ribbon · five disciplines, one hand-off
         </p>
       </div>
     </section>

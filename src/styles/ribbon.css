@@ -21,7 +21,7 @@
     content: '';
     position: absolute;
     inset: auto 0 0;
-    height: 46%;
+    height: 44%;
     background-image: linear-gradient(rgba(243, 240, 233, 0.11) 1px, transparent 1px),
       linear-gradient(90deg, rgba(243, 240, 233, 0.11) 1px, transparent 1px);
     background-size: 58px 58px;
@@ -70,17 +70,20 @@
     min-height: 0;
     display: grid;
     place-items: center;
-    perspective: 2000px;
-    perspective-origin: 50% 48%;
+    perspective: 2200px;
+    perspective-origin: 50% 50%;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 11%, #000 89%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 11%, #000 89%, transparent 100%);
   }
 
   .ribbon-ring {
-    --radius: clamp(250px, 27vw, 470px);
+    /* Radius must clear the chord between 72° plates, or neighbours cut across
+       the front card: 2·r·sin(36°) > card width. */
+    --radius: clamp(430px, 62vw, 640px);
     position: relative;
-    width: min(540px, 72vw);
+    width: min(560px, 64vw);
     aspect-ratio: 4 / 3;
     transform-style: preserve-3d;
-    transform: rotateX(2deg);
     will-change: transform;
   }
 
@@ -91,25 +94,58 @@
     flex-direction: column;
     overflow: hidden;
     background: var(--paper);
-    border: 1px solid rgba(243, 240, 233, 0.28);
-    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.55);
-    transform: rotateY(calc(var(--i) * 90deg)) translateZ(var(--radius));
+    color: var(--ink);
+    border: 1px solid rgba(243, 240, 233, 0.3);
+    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.5);
+    transform: rotateY(calc(var(--i) * 72deg)) translateZ(var(--radius));
     transform-style: preserve-3d;
     backface-visibility: hidden;
   }
 
-  .ribbon-art {
-    position: relative;
+  .ribbon-card-inner {
     flex: 1;
     min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(20px, 2.6vw, 40px);
   }
 
-  .ribbon-card .art {
-    padding: 26px 18px 30px;
+  .ribbon-card-index {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    color: var(--accent-deep);
   }
 
-  .ribbon-card .art-caption {
-    display: none;
+  .ribbon-card-inner h3 {
+    margin-top: clamp(10px, 1.4vw, 18px);
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-size: clamp(28px, 3.2vw, 46px);
+    font-weight: 500;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    max-width: 12ch;
+  }
+
+  .ribbon-card-lead {
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    line-height: 1.6;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    max-width: 34ch;
+  }
+
+  .ribbon-card .tag-list {
+    margin-top: auto;
+    padding-top: clamp(14px, 2vw, 24px);
+  }
+
+  .ribbon-card .tag-list li {
+    background: rgba(22, 19, 15, 0.03);
   }
 
   .ribbon-meta {
@@ -119,8 +155,6 @@
     gap: 12px;
     padding: 10px 14px 11px;
     border-top: 1px solid var(--ink);
-    background: var(--paper);
-    color: var(--ink);
     font-family: var(--font-mono);
     font-size: 8px;
     letter-spacing: 0.12em;
@@ -146,12 +180,11 @@
 
   /* Reduced motion / no pin: a calm flat grid instead of the ring. */
   .ribbon-ring.is-flat {
-    width: min(880px, 92vw);
+    width: min(920px, 94vw);
     aspect-ratio: auto;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 14px;
-    transform: none;
   }
 
   .ribbon-ring.is-flat .ribbon-card {
@@ -161,19 +194,35 @@
     transform: none;
   }
 
+  @media (max-width: 900px) {
+    .ribbon-ring.is-flat {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
   @media (max-width: 700px) {
-    .ribbon-viewport {
-      -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%);
-      mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%);
-    }
-
     .ribbon-ring {
-      --radius: clamp(150px, 50vw, 260px);
-      width: 68vw;
+      --radius: clamp(230px, 66vw, 340px);
+      width: 62vw;
+      aspect-ratio: 3 / 4;
     }
 
-    .ribbon-card .art {
-      padding: 16px 12px 20px;
+    .ribbon-card-inner {
+      padding: 18px 16px;
+    }
+
+    .ribbon-card-inner h3 {
+      font-size: clamp(22px, 7vw, 30px);
+    }
+
+    .ribbon-card-lead {
+      font-size: 7.5px;
+      letter-spacing: 0.08em;
+    }
+
+    .ribbon-card .tag-list li {
+      font-size: 7.5px;
+      padding: 4px 8px 5px;
     }
 
     .ribbon-note {
@@ -182,11 +231,9 @@
     }
 
     .ribbon-stage::after {
-      height: 34%;
+      height: 32%;
     }
-  }
 
-  @media (max-width: 700px) and (prefers-reduced-motion: reduce) {
     .ribbon-ring.is-flat {
       grid-template-columns: 1fr;
     }
