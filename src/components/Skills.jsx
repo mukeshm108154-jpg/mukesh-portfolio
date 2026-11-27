@@ -43,7 +43,7 @@ export default function Skills() {
           </Reveal>
           <Reveal delay={0.12}>
             <div className="skills-note">
-              <span className="dot" />
+              <span className="status-dot" />
               <span>Open to senior front-end and design-engineering contracts.</span>
             </div>
           </Reveal>

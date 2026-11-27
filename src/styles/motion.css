@@ -1,0 +1,40 @@
+@layer sections {
+  /* Mask Reveal — uberdesigner text motion (mask-reveal) */
+  .mask-reveal {
+    display: block;
+  }
+
+  .mask-line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.12em;
+    margin-bottom: -0.12em;
+  }
+
+  .mask-line__inner {
+    display: block;
+    transform: translateY(118%);
+    will-change: transform;
+  }
+
+  .mask-reveal.is-in .mask-line__inner {
+    animation: mask-rise 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: calc(var(--line, 0) * 0.12s);
+  }
+
+  @keyframes mask-rise {
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mask-line__inner {
+      transform: none;
+    }
+
+    .mask-reveal.is-in .mask-line__inner {
+      animation: none;
+    }
+  }
+}

@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react'
 import { contact, socials } from '../data/content'
 import Reveal from './Reveal'
 import Magnetic from './Magnetic'
+import MaskReveal from './MaskReveal'
 import { ArrowUpRight, Check, Copy, iconMap } from './Icons'
 
 const initial = { name: '', email: '', type: '', budget: '', message: '' }
+
+const headingLines = ['Let’s make', 'something', <em key="keeping">worth keeping.</em>]
 
 function validate(values) {
   const errors = {}
@@ -83,15 +86,11 @@ export default function Contact() {
 
       <div className="contact-grid">
         <div className="contact-lede">
-          <Reveal>
-            <h2 className="display">
-              Let’s make
-              <br />
-              something
-              <br />
-              <em>worth keeping.</em>
-            </h2>
-          </Reveal>
+          <MaskReveal
+            as="h2"
+            className="display"
+            lines={headingLines}
+          />
 
           <Reveal delay={0.08}>
             <p className="contact-copy">

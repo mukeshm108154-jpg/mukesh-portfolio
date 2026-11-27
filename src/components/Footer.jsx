@@ -6,6 +6,11 @@ import Magnetic from './Magnetic'
 export default function Footer() {
   return (
     <footer className="footer">
+      {/* Drifting dot strip — from MotionSites' "Stark Minimal Footer" section prompt. */}
+      <div className="footer-dots" aria-hidden="true">
+        <span className="footer-dots__line" />
+      </div>
+
       <div className="footer-top">
         <div className="footer-brand">
           <span className="nav-mark">M.</span>
